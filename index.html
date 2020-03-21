@@ -1,0 +1,221 @@
+<html lang="en"><head>
+  <title>3D Waveform</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <style type="text/css">
+    body { background-color: #ffffff; margin: 0px; overflow: hidden; }
+    a { color:#0078ff; }
+    #info { position: absolute; top: 0px; width: 100%; padding: 5px; font-family:Monospace; text-align:center; }
+    #play-btn {
+      position: absolute;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+    }
+  </style>
+<body>
+  <script type="text/javascript" src="node_modules/three/build/three.js"></script>
+
+  <button id="play-btn">Play</button>
+
+  <div id="container"></div>
+
+  <script type="text/javascript">
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+    document.querySelector('#play-btn').addEventListener('click', () => {
+      window.audioWave.play();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.scene = new Scene(document.getElementById('container'));
+
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      window.audioWave = new AudioWave(audioContext);
+      window.audioWave.init().then(res => {
+        console.log(res.lenght);
+
+        const figure = new Figure();
+
+        window.scene.addMesh(figure.mesh);
+
+        const data = window.audioWave.getData();
+        window.scene.addUpdate(() => {
+          // console.log(window.audioWave.getData());
+          figure.update(audioWave.currentTime, data);
+        });
+
+        window.scene.update();
+      })
+    });
+
+    const windowHalfX = window.innerWidth / 2;
+    const windowHalfY = window.innerHeight / 2;
+    function onDocumentMouseMove( event ) {
+      mouseX = ( event.clientX - windowHalfX );
+      mouseY = ( event.clientY - windowHalfY );
+    }
+
+    const perspective = 800;
+
+    class Scene {
+      constructor(container) {
+        this.updates = [];
+        this.container = container;
+
+        this.scene = new THREE.Scene();
+        this.renderer = new THREE.WebGLRenderer({
+          alpha: true
+        });
+
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+
+        this.container.appendChild(this.renderer.domElement);
+
+        this.initLights();
+        this.initCamera();
+      }
+
+      initLights() {
+        const ambientlight = new THREE.AmbientLight(0xffffff, 2);
+        this.scene.add(ambientlight);
+      }
+
+      initCamera() {
+        const fov =
+          (180 * (2 * Math.atan(window.innerHeight / 2 / perspective))) / Math.PI;
+
+        this.camera = new THREE.PerspectiveCamera(
+          fov,
+          window.innerWidth / window.innerHeight,
+          1,
+          1000
+        );
+        this.camera.position.set(0, 0, perspective);
+      }
+
+      addMesh(mesh) {
+        this.scene.add(mesh);
+      }
+
+      addUpdate(func) {
+        this.updates.push(func);
+      }
+
+      update() {
+        if (this.renderer === undefined) return;
+        requestAnimationFrame(this.update.bind(this));
+
+        // Camera pos update
+        this.camera.position.x += (mouseX - this.camera.position.x) * .05;
+        this.camera.position.y += (-mouseY - this.camera.position.y) * .05;
+
+        this.updates.forEach(i => i && i());
+
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+
+    class AudioWave {
+      constructor(context, filePath) {
+        this.context = context;
+        this.filePath = filePath || './eedl_slumber.mp3';
+
+        this.audio = context.createBufferSource();
+      }
+
+      init() {
+          return fetch(this.filePath)
+            .then(response => response.arrayBuffer())
+            .then(async (arrayBuffer) => {
+              const buffer = await this.context.decodeAudioData(arrayBuffer);
+              this.audio.buffer = buffer;
+
+              this.audio.connect(this.context.destination);
+              this.audio.loop = true;
+
+              console.log(this.audio);
+
+              return buffer;
+            })
+            .then(data => {
+              this.rawData = data.getChannelData(0);
+
+              return this.getData();
+            });
+      }
+
+      play() {
+          this.audio.start(0);
+      }
+
+      getData() {
+        return this.normalizeData(this.filterData(this.rawData));
+      }
+
+      get currentTime() {
+        return this.context.currentTime;
+      }
+
+      filterData(rawData) {
+        // const samples = 5000; // Number of samples we want to have in our final data set
+        // const blockSize = Math.floor(rawData.length / samples); // the number of samples in each subdivision
+        const filteredData = [];
+        // const startPoint = parseInt(this.currentTime);
+        // if (startPoint + samples < rawData.length) {
+          for (let i = 0; i < rawData.length; i++) {
+            // let blockStart = blockSize * i; // the location of the first sample in the block
+            // let sum = 0;
+            // for (let j = 0; j < blockSize; j++) {
+              // sum = sum + Math.abs(rawData[blockStart + j]); // find the sum of all the samples in the block
+            // }
+            // filteredData.push(sum / blockSize); // divide the sum by the block size to get the average
+            filteredData.push(rawData[i]);
+          }
+        // }
+
+        return filteredData;
+      };
+
+      normalizeData(filteredData) {
+        return filteredData.map(n => n * 100);
+      }
+    }
+
+    class Figure {
+      constructor(size) {
+        this.mesh = new THREE.Group();
+
+        var meshWidth = 20;
+        var amount = 5000;
+        this.amountHalf = amount / 2;
+
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+
+        for (let i = 0; i < amount; i++) {
+          const color = (i == this.amountHalf) ? 0x0078ff : 0x202020;
+          const mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color}));
+
+          mesh.position.x = i * meshWidth - ( ( amount * meshWidth ) / 2 );
+          mesh.scale.x = meshWidth / 2;
+          mesh.scale.y = mesh.scale.z = 100;
+
+          this.mesh.add(mesh);
+        }
+      }
+
+      update(audioTime, data) {
+        const amplitude = Math.floor((44100 * audioTime / 1));
+
+        this.mesh.children.forEach((mesh, i) => {
+          // mesh.scale.y = mesh.scale.z = data[(amplitude + i) - this.amountHalf] * .1
+          mesh.scale.y = mesh.scale.z = data[amplitude];
+        })
+      }
+    }
+  </script>
+</body>
+</html>
