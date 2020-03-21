@@ -2,13 +2,18 @@
   "name": "noize",
   "version": "1.0.0",
   "description": "",
-  "main": "data.js",
+  "main": "./src/js/index.js",
   "scripts": {
+    "start": "parcel index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "three": "^0.114.0"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
   }
 }
