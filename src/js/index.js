@@ -10,9 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const audioData = new AudioDataProvider(FileProvider.instance);
 
-  audioData.subscribe(data => {
-    console.log("Final", data);
-
+  audioData.subscribe(() => {
     // console.log(audioData.getByteFrequency());
     // console.log(audioData.getByteTimeDomain());
 

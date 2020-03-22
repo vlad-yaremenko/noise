@@ -1,4 +1,5 @@
 document.addEventListener("mousemove", onDocumentMouseMove);
+import { normalize } from "../helper";
 
 function onDocumentMouseMove(event) {
   Controller.instance.set(event.clientX, event.clientY);
@@ -11,8 +12,14 @@ export default class Controller {
   }
 
   static diapason = {
-    x: window.innerWidth / 5,
-    y: window.innerHeight / 5
+    x: {
+      min: -300,
+      max: 300
+    },
+    y: {
+      min: -300,
+      max: 300
+    }
   };
 
   static get instance() {
@@ -24,7 +31,17 @@ export default class Controller {
   }
 
   set(x, y) {
-    this.x = x - Controller.diapason.x;
-    this.y = y - Controller.diapason.y;
+    this.x = normalize(
+      x,
+      window.innerWidth,
+      Controller.diapason.x.max,
+      Controller.diapason.x.min
+    );
+    this.y = normalize(
+      y,
+      window.innerWidth,
+      Controller.diapason.y.max,
+      Controller.diapason.y.min
+    );
   }
 }

@@ -1,12 +1,14 @@
 import * as THREE from "three";
+import { normalize } from "../helper";
 
 const MAX_VALUE = 255;
 
 export default class WaveObject {
-  constructor(byteFrequency) {
+  constructor(byteFrequency = []) {
     this.data = byteFrequency;
 
     this.mesh = new THREE.Group();
+    this.mesh.position.y = 100;
 
     this.minSize = 5;
     this.maxSize = 100;
@@ -24,7 +26,7 @@ export default class WaveObject {
         geometry,
         new THREE.MeshLambertMaterial({ color })
       );
-      mesh.position.x = i * meshWidth - ((meshesAmount / 2) * meshWidth) / 2;
+      mesh.position.x = i * meshWidth - (meshesAmount * meshWidth) / 2;
       mesh.scale.x = meshWidth / 2;
       mesh.scale.y = mesh.scale.z = 100;
       this.mesh.add(mesh);
@@ -50,6 +52,6 @@ export default class WaveObject {
   }
 
   normalizeValue(value) {
-    return (value / MAX_VALUE) * (this.maxSize - this.minSize) + this.minSize;
+    return normalize(value, MAX_VALUE, this.maxSize, this.minSize);
   }
 }

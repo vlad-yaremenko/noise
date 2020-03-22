@@ -2,6 +2,7 @@ import * as THREE from "three";
 import TWEEN from "@tweenjs/tween.js";
 
 import Controller from "./Controller";
+import { AmbientLight } from "three";
 
 const perspective = 800;
 
@@ -29,8 +30,12 @@ export default class Scene {
   }
 
   initLights() {
-    const ambientlight = new THREE.AmbientLight(0xffffff, 2);
-    this.scene.add(ambientlight);
+    const light = new THREE.DirectionalLight(0x888888, 1, 100);
+    light.position.set(0, 0, 1);
+    this.scene.add(light);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff);
+    this.scene.add(ambientLight);
   }
 
   initCamera() {
@@ -58,7 +63,6 @@ export default class Scene {
     if (this.renderer === undefined) return;
     requestAnimationFrame(this.update.bind(this));
 
-    // Camera pos update
     this.camera.position.x +=
       (Controller.instance.x - this.camera.position.x) * 0.05;
     this.camera.position.y +=
