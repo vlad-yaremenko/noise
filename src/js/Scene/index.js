@@ -1,4 +1,7 @@
 import * as THREE from "three";
+import TWEEN from "@tweenjs/tween.js";
+
+import Controller from "./Controller";
 
 const perspective = 800;
 
@@ -19,6 +22,10 @@ export default class Scene {
 
     this.initLights();
     this.initCamera();
+  }
+
+  start() {
+    this.update();
   }
 
   initLights() {
@@ -47,15 +54,19 @@ export default class Scene {
     this.updates.push(func);
   }
 
-  update() {
+  update(time) {
     if (this.renderer === undefined) return;
     requestAnimationFrame(this.update.bind(this));
 
     // Camera pos update
-    this.camera.position.x += (window.mouseX - this.camera.position.x) * 0.05;
-    this.camera.position.y += (-window.mouseY - this.camera.position.y) * 0.05;
+    this.camera.position.x +=
+      (Controller.instance.x - this.camera.position.x) * 0.05;
+    this.camera.position.y +=
+      (-Controller.instance.y - this.camera.position.y) * 0.05;
 
     this.updates.forEach(i => i && i());
+
+    TWEEN.update(time);
 
     this.renderer.render(this.scene, this.camera);
   }
