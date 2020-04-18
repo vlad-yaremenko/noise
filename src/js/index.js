@@ -11,15 +11,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const audioData = new AudioDataProvider(FileProvider.instance);
 
   audioData.subscribe(() => {
-    // console.log(audioData.getByteFrequency());
-    // console.log(audioData.getByteTimeDomain());
+    scene.clear();
+    audioData.reset();
 
-    const waveObj = new WaveObject(audioData.getByteFrequency());
+    const waveObj = new WaveObject(
+      audioData.getByteFrequency(),
+      audioData.getByteTimeDomain()
+    );
 
     scene.addMesh(waveObj.mesh);
 
     scene.addUpdate(() => {
-      waveObj.setByteFrequency(audioData.getByteFrequency());
+      waveObj.setBitFrequency(audioData.getByteFrequency());
+      waveObj.setColorFrequency(audioData.getByteTimeDomain());
       waveObj.update();
     });
 

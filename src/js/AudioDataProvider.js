@@ -9,10 +9,14 @@ export default class AudioDataProvider {
     this.observer = new Observer();
 
     this.provider = provider;
-    this.provider.subscribe(arrayBuffer => {
+    this.provider.subscribe((arrayBuffer) => {
       this.generate(arrayBuffer);
     });
 
+    this.init();
+  }
+
+  init() {
     this.audioSource = this.context.createBufferSource();
 
     this.analyser = this.context.createAnalyser();
@@ -47,54 +51,15 @@ export default class AudioDataProvider {
     this.audioSource.start();
   }
 
+  reset() {
+    if (this.audioSource.context.state === "running") {
+      this.audioSource.stop();
+    }
+
+    this.init();
+  }
+
   subscribe(f) {
     this.observer.subscribe(f);
   }
 }
-
-//   init(arrayBuffer) {
-//     return new Promise(async (resolve, reject) => {
-//       this.audio.buffer = buffer;
-
-//       this.audio.connect(this.context.destination);
-
-//       this.rawData = buffer.getChannelData(0);
-
-//       resolve(this.getData());
-//     });
-
-//   play() {
-//     this.audio.start(0);
-//   }
-
-//   getData(minValue = 0) {
-//     return this.normalizeData(this.filterData(this.rawData, minValue));
-//   }
-
-//   get currentTime() {
-//     return this.context.currentTime;
-//   }
-
-//   get sampleRate() {
-//     return this.context.sampleRate;
-//   }
-
-//   filterData(rawData, minValue = 0) {
-//     const filteredData = [];
-//     console.log(rawData);
-//     for (let i = 0; i < rawData.length; i++) {
-//       if (rawData[i] < minValue) {
-//         filteredData.push(0);
-//       } else {
-//         filteredData.push(rawData[i]);
-//       }
-//     }
-
-//     return filteredData;
-//   }
-
-//   normalizeData(filteredData) {
-//     const multiplier = Math.pow(0.02, -1);
-//     return filteredData.map(n => n * multiplier);
-//   }
-// }

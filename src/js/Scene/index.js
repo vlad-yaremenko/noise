@@ -13,8 +13,11 @@ export default class Scene {
 
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({
-      alpha: true
+      alpha: true,
     });
+
+    this.actors = new THREE.Object3D();
+    this.scene.add(this.actors);
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -27,6 +30,12 @@ export default class Scene {
 
   start() {
     this.update();
+  }
+
+  clear() {
+    while (this.actors.children.length > 0) {
+      this.actors.remove(this.actors.children[0]);
+    }
   }
 
   initLights() {
@@ -52,7 +61,7 @@ export default class Scene {
   }
 
   addMesh(mesh) {
-    this.scene.add(mesh);
+    this.actors.add(mesh);
   }
 
   addUpdate(func) {
@@ -68,7 +77,7 @@ export default class Scene {
     this.camera.position.y +=
       (-Controller.instance.y - this.camera.position.y) * 0.05;
 
-    this.updates.forEach(i => i && i());
+    this.updates.forEach((i) => i && i());
 
     TWEEN.update(time);
 
