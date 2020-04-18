@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const audioData = new AudioDataProvider(FileProvider.instance);
 
+  scene.start();
+
   audioData.subscribe(() => {
     scene.clear();
     audioData.reset();
@@ -22,9 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     scene.addMesh(waveObj.mesh);
 
     scene.addUpdate(() => {
-      waveObj.setBitFrequency(audioData.getByteFrequency());
-      waveObj.setColorFrequency(audioData.getByteTimeDomain());
-      waveObj.update();
+      // waveObj.setBitFrequency(audioData.getByteFrequency());
+      // waveObj.setColorFrequency(audioData.getByteTimeDomain());
+      // waveObj.update();
     });
 
     audioData.start();

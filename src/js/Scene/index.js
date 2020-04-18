@@ -1,8 +1,12 @@
 import * as THREE from "three";
 import TWEEN from "@tweenjs/tween.js";
 
+import { OBJLoader2 } from "three/examples/jsm/loaders/OBJLoader2";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
+import { MtlObjBridge } from "three/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js";
+
 import Controller from "./Controller";
-import { AmbientLight } from "three";
 
 const perspective = 800;
 
@@ -12,6 +16,25 @@ export default class Scene {
     this.container = container;
 
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color("black");
+
+    {
+      const skyColor = 0xb1e1ff; // light blue
+      const groundColor = 0xb97a20; // brownish orange
+      const intensity = 1;
+      const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+      this.scene.add(light);
+    }
+    {
+      const color = 0xffffff;
+      const intensity = 1;
+      const light = new THREE.DirectionalLight(color, intensity);
+      light.position.set(0, 10, 0);
+      light.target.position.set(-5, 0, 0);
+      this.scene.add(light);
+      this.scene.add(light.target);
+    }
+
     this.renderer = new THREE.WebGLRenderer({
       alpha: true,
     });
@@ -26,9 +49,74 @@ export default class Scene {
 
     this.initLights();
     this.initCamera();
+
+    {
+      const controls = new OrbitControls(this.camera, container);
+      controls.target.set(0, 5, 0);
+      controls.update();
+    }
   }
 
   start() {
+    const loader = new OBJLoader2();
+
+    {
+      const mtlLoader = new MTLLoader();
+      mtlLoader.load("./Super_meatboy_free.mtl", (mtlParseResult) => {
+        const materials = MtlObjBridge.addMaterialsFromMtlLoader(
+          mtlParseResult
+        );
+        loader.addMaterials(materials);
+        loader.load("./Super_meatboy_free.obj", (root) => {
+          root.scale.x = 100;
+          root.scale.y = 100;
+          root.scale.z = 100;
+
+          const uniforms = {};
+          uniforms.colorA = { type: "vec3", value: new THREE.Color(0x74ebd5) };
+          uniforms.colorB = { type: "vec3", value: new THREE.Color(0xacb6e5) };
+
+          const material = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            fragmentShader: fragmentShader(),
+            vertexShader: vertexShader(),
+          });
+
+          console.log(root);
+
+          root.children[0].material = material;
+
+          this.actors.add(root);
+        });
+      });
+    }
+
+    function vertexShader() {
+      return `
+        varying vec3 vUv;
+        varying vec4 modelViewPosition;
+        varying vec3 vecNormal;
+
+        void main() {
+          vUv = position;
+          vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+          vecNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz; //????????
+          gl_Position = projectionMatrix * modelViewPosition;
+        }
+      `;
+    }
+    function fragmentShader() {
+      return `
+          uniform vec3 colorA;
+          uniform vec3 colorB;
+          varying vec3 vUv;
+
+          void main() {
+            gl_FragColor = vec4(mix(colorA, colorB, vUv.z), 1.0);
+          }
+      `;
+    }
+
     this.update();
   }
 

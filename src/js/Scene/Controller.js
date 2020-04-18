@@ -14,12 +14,12 @@ export default class Controller {
   static diapason = {
     x: {
       min: -300,
-      max: 300
+      max: 300,
     },
     y: {
       min: -300,
-      max: 300
-    }
+      max: 300,
+    },
   };
 
   static get instance() {
