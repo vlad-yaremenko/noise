@@ -3,7 +3,7 @@ import Observer from "./Observer";
 const reader = new FileReader();
 document.addEventListener("DOMContentLoaded", () => {
   const fileInput = document.querySelector("#file");
-  fileInput.addEventListener("change", e =>
+  fileInput.addEventListener("change", (e) =>
     FileProvider.instance.eventHandler(e)
   );
 });
@@ -29,6 +29,9 @@ export default class FileProvider {
 
     this.file = event.target.files[0];
     reader.readAsArrayBuffer(this.file);
+
+    const name = this.file.name.split(".")[0];
+    document.getElementById("name").innerHTML = name;
   }
 
   readerHandler(e) {

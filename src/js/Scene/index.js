@@ -2,7 +2,9 @@ import * as THREE from "three";
 import TWEEN from "@tweenjs/tween.js";
 
 import Controller from "./Controller";
-import { AmbientLight } from "three";
+
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 
 const perspective = 800;
 
@@ -12,9 +14,12 @@ export default class Scene {
     this.container = container;
 
     this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.Fog(0x222222, 1, 1000);
+
     this.renderer = new THREE.WebGLRenderer({
       alpha: true,
     });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
 
     this.actors = new THREE.Object3D();
     this.scene.add(this.actors);
@@ -26,6 +31,7 @@ export default class Scene {
 
     this.initLights();
     this.initCamera();
+    this.initPostprocessing();
   }
 
   start() {
@@ -39,12 +45,11 @@ export default class Scene {
   }
 
   initLights() {
-    const light = new THREE.DirectionalLight(0x888888, 1, 100);
+    const light = new THREE.DirectionalLight(0xffffff, 1, 100);
     light.position.set(0, 0, 1);
     this.scene.add(light);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff);
-    this.scene.add(ambientLight);
+    this.scene.add(new THREE.AmbientLight(0x222222));
   }
 
   initCamera() {
@@ -58,6 +63,11 @@ export default class Scene {
       1000
     );
     this.camera.position.set(0, 0, perspective);
+  }
+
+  initPostprocessing() {
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
   }
 
   addMesh(mesh) {
@@ -81,6 +91,6 @@ export default class Scene {
 
     TWEEN.update(time);
 
-    this.renderer.render(this.scene, this.camera);
+    this.composer.render();
   }
 }
