@@ -1,23 +1,17 @@
 <html lang="en"><head>
-  <title>3D Waveform</title>
+  <title>Visual noise</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
-  <style type="text/css">
-    body { background-color: #ffffff; margin: 0px; overflow: hidden; }
-    a { color:#0078ff; }
-    #info { position: absolute; top: 0px; width: 100%; padding: 5px; font-family:Monospace; text-align:center; }
-    #play-btn {
-      position: absolute;
-      z-index: 9999;
-      left: 0;
-      top: 0;
-    }
-  </style>
-<body>
-  <script src="./src/js/index.js"></script>
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/styles/styles.scss">
+<body>
   <input id="file" type="file" accept="audio/*" />
 
+  <h1 id="name"></h1>
+
   <div id="container"></div>
+
+  <script src="./src/js/index.js"></script>
 </body>
 </html>

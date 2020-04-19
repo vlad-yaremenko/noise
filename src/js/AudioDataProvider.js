@@ -53,7 +53,12 @@ export default class AudioDataProvider {
 
   reset() {
     if (this.audioSource.context.state === "running") {
-      this.audioSource.stop();
+      try {
+        this.audioSource.stop();
+      } catch (e) {
+        // In some reason during development it cause an error in case of hot module replacement
+        console.error(e);
+      }
     }
 
     this.init();

@@ -1,0 +1,29 @@
+body {
+  background-color: #ffffff;
+  margin: 0px;
+}
+#container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+#file {
+  position: absolute;
+  z-index: 1;
+}
+
+#name {
+  position: absolute;
+  z-index: -1;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  font-family: 'Roboto Mono', monospace;
+  text-align: center;
+  font-size: 50px;
+  text-shadow: 2px 2px 3px;
+}
